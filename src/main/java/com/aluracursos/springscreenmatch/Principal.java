@@ -1,5 +1,6 @@
 package com.aluracursos.springscreenmatch;
 
+import com.aluracursos.springscreenmatch.model.Episodio;
 import com.aluracursos.springscreenmatch.service.ConversorDatos;
 import com.aluracursos.springscreenmatch.model.DatosEpisodio;
 import com.aluracursos.springscreenmatch.model.DatosSerie;
@@ -38,15 +39,16 @@ public class Principal {
        /* for (int i = 0; i < datos.totalTemporadas(); i++) {
             List<DatosEpisodio> episodiosTemporadas = temporadas.get(i).episodios();
             for (int j = 0; j < episodiosTemporadas.size(); j++) {
-                System.out.println(episodiosTemporadas.get(j).titulo());
+                System.out.println(episodiosTemporadas.get(j).titulo()); //imprime todos los episodios de todas las temporadas de la serie
             }
-        }*/ //imprime todos los episodios de todas las temporadas de la serie
+        }
+        */
 
         //temporadas.forEach(t -> t.episodios().forEach(e -> System.out.println(e.titulo()))); // usa lambda para imprimir todos los episodios de todas las temporadas de la serie
 
         //temporadas.get(1).episodios().forEach(e -> System.out.println(e.titulo())); //imprime todos los episodios de la primera temporada (1)
 
-        List<DatosEpisodio> datosEpisodios = temporadas.stream()
+        /*List<DatosEpisodio> datosEpisodios = temporadas.stream()
                 .flatMap(t -> t.episodios().stream())
                 .collect(Collectors.toList()); //datos de cada episodio con stream y lambdas
 
@@ -55,5 +57,18 @@ public class Principal {
                 .filter(e -> !e.evaluacion().equalsIgnoreCase("N/A")) //filtra para evitar los episodios que en evaluacion muestran N/A
                 .limit(5) // limita a 5 episodios, es decir top 5.
                 .forEach(e -> System.out.println(e.titulo() + " = " + e.evaluacion())); //imprime tituloEpisodio = evaluacion
+        */
+        List<Episodio> episodios = temporadas.stream()
+                .flatMap(t -> t.episodios().stream()
+                        .map(d -> new Episodio(t.numero(),d)))
+                .collect(Collectors.toList());
+
+        episodios.stream()
+                .sorted(Comparator.comparing(Episodio::getEvaluacion).reversed())
+                .filter(e -> !Double.isNaN(e.getEvaluacion())) // Filtra las evaluaciones inválidas
+                .limit(5)   // limita a 5;
+                .forEach(e -> System.out.println("Episodio: " +  e.getTitulo() + " |" + " Temporada: " + e.getTemporada() + " | Evaluacion = " + e.getEvaluacion()));
+
     }
+
 }
